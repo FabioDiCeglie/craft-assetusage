@@ -90,6 +90,7 @@ class Asset extends Component
             ->select(['elementId as id', 'siteId'])
             ->from(Table::ELEMENTS_SITES)
             ->where(['like', 'content', "asset:{$asset->id}:"])
+            ->orWhere(['like', 'content', "\"imageId\": \"{$asset->id}\","])
             ->all();
     }
 

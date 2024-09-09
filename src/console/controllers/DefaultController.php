@@ -74,7 +74,8 @@ class DefaultController extends Controller
         $subQueryContent = (new Query())
             ->select('elementId as id')
             ->from(Table::ELEMENTS_SITES)
-            ->where("`content` LIKE CONCAT('%asset:', assets.id, ':%')");
+            ->where("`content` LIKE CONCAT('%asset:', assets.id, ':%')")
+            ->orWhere("`content` LIKE CONCAT('%\"imageId\": \"', assets.id, '\",%')");
     
         $query = (new Query())
             ->select(['assets.id', 'assets.filename'])
