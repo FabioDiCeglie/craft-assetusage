@@ -21,7 +21,7 @@ class Asset extends Component
      */
     public function getUsageCount(AssetElement $asset): string
     {
-        $relations = $this->queryRelations($asset);
+        $relations = array_merge($this->queryRelations($asset), $this->queryContents($asset));
 
         if (Plugin::getInstance()->settings->includeRevisions) {
             return $this->formatResults(count($relations));
@@ -49,7 +49,7 @@ class Asset extends Component
      */
     public function getUsedIn(AssetElement $asset): array
     {
-        $relations = $this->queryRelations($asset);
+        $relations = array_merge($this->queryRelations($asset), $this->queryContents($asset));
 
         $elements = [];
 
@@ -81,6 +81,15 @@ class Asset extends Component
             ->select(['sourceId as id', 'sourceSiteId as siteId'])
             ->from(Table::RELATIONS)
             ->where(['targetId' => $asset->id])
+            ->all();
+    }
+
+    private function queryContents(AssetElement $asset): array
+    {
+        return (new Query())
+            ->select(['elementId as id', 'siteId'])
+            ->from(Table::ELEMENTS_SITES)
+            ->where(['like', 'content', "asset:{$asset->id}:"])
             ->all();
     }
 
