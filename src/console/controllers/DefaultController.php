@@ -65,18 +65,24 @@ class DefaultController extends Controller
             $volumeModel = Craft::$app->getVolumes()->getVolumeByHandle($volume);
         }
 
-        $subQuery = (new Query())
+        $subQueryRelations = (new Query())
           ->select('id')
           ->from(['relations' => Table::RELATIONS])
           ->where('relations.targetId=assets.id')
           ->orWhere('relations.sourceId=assets.id');
+
+        $subQueryContent = (new Query())
+            ->select('elementId as id')
+            ->from(Table::ELEMENTS_SITES)
+            ->where("`content` LIKE CONCAT('%asset:', assets.id, ':%')");
     
         $query = (new Query())
             ->select(['assets.id', 'assets.filename'])
             ->from(['assets' => Table::ASSETS])
             ->innerJoin(['elements' => Table::ELEMENTS], '[[elements.id]] = [[assets.id]]')
             ->where(['elements.dateDeleted' => null])
-            ->andWhere(['not exists', $subQuery]);
+            ->andWhere(['not exists', $subQueryRelations])
+            ->andWhere(['not exists', $subQueryContent]);
 
         if (isset($volumeModel)) {
             $query->where(['volumeId' => $volumeModel->id]);
